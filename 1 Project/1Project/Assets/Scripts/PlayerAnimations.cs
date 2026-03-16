@@ -1,0 +1,35 @@
+using UnityEngine;
+
+public class PlayerAnimations : MonoBehaviour
+{
+    private Animator animator;
+    private PlayerController playerController;
+
+    private void Start()
+    {
+        animator = GetComponent<Animator>();
+        playerController = GetComponent<PlayerController>();
+    }
+
+    private void Update()
+    {
+        // Получаем скорость из Input
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        // Вычисляем общую скорость движения
+        float speed = new Vector2(horizontal, vertical).magnitude;
+
+        // Отладочный вывод — проверь, меняется ли speed
+        Debug.Log("Speed: " + speed);
+
+        // Передаём значение в аниматор
+        animator.SetFloat("speed", speed);
+
+        // Атака
+        if (Input.GetMouseButtonDown(0))
+        {
+            animator.SetTrigger("attack");
+        }
+    }
+}
