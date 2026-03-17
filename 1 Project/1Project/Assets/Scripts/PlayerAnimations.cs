@@ -20,8 +20,7 @@ public class PlayerAnimations : MonoBehaviour
         // Вычисляем общую скорость движения
         float speed = new Vector2(horizontal, vertical).magnitude;
 
-        // Отладочный вывод — проверь, меняется ли speed
-        Debug.Log("Speed: " + speed);
+
 
         // Передаём значение в аниматор
         animator.SetFloat("speed", speed);

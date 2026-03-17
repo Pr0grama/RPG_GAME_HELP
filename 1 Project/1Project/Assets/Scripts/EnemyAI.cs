@@ -22,10 +22,27 @@ public class EnemyAI : MonoBehaviour
             if (playerObj != null)
                 player = playerObj.transform;
         }
+
+        health = GetComponent<Health>();
+
+        if (player == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+                Debug.Log("✅ Враг нашёл игрока: " + player.name);
+            }
+            else
+            {
+                Debug.LogError("❌ Враг НЕ нашёл игрока! Тег Player не найден!");
+            }
+        }
     }
 
     private void Update()
     {
+
         if (player == null || health == null) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
@@ -48,6 +65,7 @@ public class EnemyAI : MonoBehaviour
                 nextAttackTime = Time.time + attackCooldown;
             }
         }
+
     }
 
     void AttackPlayer()
@@ -59,6 +77,8 @@ public class EnemyAI : MonoBehaviour
         {
             playerHealth.TakeDamage(damage, DamageType.Physical);
         }
+
+
     }
 
     private void OnDrawGizmosSelected()

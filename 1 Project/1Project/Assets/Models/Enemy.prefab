@@ -360,7 +360,7 @@ GameObject:
   - component: {fileID: 914039275030967538}
   m_Layer: 6
   m_Name: Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -513,7 +513,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db46f59200f6d0340991e5e0abc36b2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  speed: 3
+  speed: 25
   attackRange: 2
   attackCooldown: 1.5
   damage: 10
