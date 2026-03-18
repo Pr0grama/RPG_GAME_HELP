@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class PlayerAnimations : MonoBehaviour
 {
@@ -13,22 +13,31 @@ public class PlayerAnimations : MonoBehaviour
 
     private void Update()
     {
-        // Получаем скорость из Input
+        // РџРѕР»СѓС‡Р°РµРј СЃРєРѕСЂРѕСЃС‚СЊ РёР· Input
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        // Вычисляем общую скорость движения
+        // Р’С‹С‡РёСЃР»СЏРµРј РѕР±С‰СѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ
         float speed = new Vector2(horizontal, vertical).magnitude;
 
 
 
-        // Передаём значение в аниматор
+        // РџРµСЂРµРґР°С‘Рј Р·РЅР°С‡РµРЅРёРµ РІ Р°РЅРёРјР°С‚РѕСЂ
         animator.SetFloat("speed", speed);
 
-        // Атака
+        // РђС‚Р°РєР°
         if (Input.GetMouseButtonDown(0))
         {
             animator.SetTrigger("attack");
         }
+
+
+    }
+
+    // РџСѓР±Р»РёС‡РЅС‹Р№ РјРµС‚РѕРґ РґР»СЏ РІС‹Р·РѕРІР° РёР· РґСЂСѓРіРѕРіРѕ СЃРєСЂРёРїС‚Р° (РЅР°РїСЂРёРјРµСЂ, Health)
+    public void TriggerHitAnimation()
+    {
+        animator.SetTrigger("hit");
+        Debug.Log("рџ¤• РђРЅРёРјР°С†РёСЏ РїРѕР»СѓС‡РµРЅРёСЏ СѓСЂРѕРЅР°!");
     }
 }

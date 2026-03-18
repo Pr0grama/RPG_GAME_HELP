@@ -12,9 +12,21 @@ public class Health : MonoBehaviour
     public float currentHealth;
     public System.Action onDeath;
 
+    // Ссылка на скрипт анимаций игрока
+    private PlayerAnimations playerAnimations;
+
     private void Start()
     {
         currentHealth = maxHealth;
+
+        // Пытаемся получить компонент анимаций (если он есть на этом объекте)
+        playerAnimations = GetComponent<PlayerAnimations>();
+
+        // Если не нашли на этом объекте, ищем в детях (на случай, если аниматор на модели)
+        if (playerAnimations == null)
+        {
+            playerAnimations = GetComponentInChildren<PlayerAnimations>();
+        }
     }
 
     public void TakeDamage(float amount, DamageType damageType)
@@ -22,15 +34,16 @@ public class Health : MonoBehaviour
         currentHealth -= amount;
         Debug.Log(gameObject.name + " получил урон: " + amount + ", тип: " + damageType);
 
+        // ✅ Запускаем анимацию получения урона
+        if (playerAnimations != null)
+        {
+            playerAnimations.TriggerHitAnimation();
+        }
+
         if (currentHealth <= 0)
         {
             Die();
         }
-
-        Debug.Log("🔥 TakeDamage ВЫЗВАН на объекте: " + gameObject.name);
-        currentHealth -= amount;
-        Debug.Log(gameObject.name + " получил урон: " + amount + ", тип: " + damageType + ", осталось: " + currentHealth);
-        // ...
     }
 
     private void Die()
