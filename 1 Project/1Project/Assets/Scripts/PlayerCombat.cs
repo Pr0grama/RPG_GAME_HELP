@@ -9,9 +9,13 @@ public class PlayerCombat : MonoBehaviour
     public LayerMask enemyLayers;
     public GameObject magicProjectilePrefab; // префаб снаряда
     public Transform magicSpawnPoint;        // откуда вылетает магия
+    public MagicCooldownUI cooldownUI;
+
+    [Header("Magic Cooldown")]
+    public float magicCooldown = 2f;         // длительность перезарядки в секундах
+    private float nextMagicTime = 0f;        // когда можно будет снова кастовать
 
     private Animator animator;
-
 
     private void Start()
     {
@@ -26,10 +30,14 @@ public class PlayerCombat : MonoBehaviour
             PhysicalAttack();
         }
 
-        // Магическая атака (правая кнопка мыши)
-        if (Input.GetMouseButtonDown(1))
+        // Магическая атака (правая кнопка мыши) с проверкой кулдауна
+        if (Input.GetMouseButtonDown(1) && Time.time >= nextMagicTime)
         {
             MagicalAttack();
+            nextMagicTime = Time.time + magicCooldown; // устанавливаем время следующей возможной атаки
+
+            if (cooldownUI != null)
+                cooldownUI.StartCooldown(); // ← запуск визуала
         }
     }
 
@@ -63,8 +71,6 @@ public class PlayerCombat : MonoBehaviour
             GameObject projectile = Instantiate(magicProjectilePrefab,
                                                magicSpawnPoint.position,
                                                magicSpawnPoint.rotation);
-
-            // Можно добавить небольшую задержку или эффект
         }
     }
 
@@ -75,6 +81,4 @@ public class PlayerCombat : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
-
-
 }
