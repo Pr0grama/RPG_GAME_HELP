@@ -1269,7 +1269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09d252d70937fbd4e95ec6413e4bb6a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthBar
-  playerHealth: {fileID: 1164949882}
+  playerHealth: {fileID: 1039091886}
   healthSlider: {fileID: 102700711}
 --- !u!1 &467379782
 GameObject:
