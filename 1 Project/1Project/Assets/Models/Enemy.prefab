@@ -515,7 +515,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
   enemyType: 0
-  speed: 25
+  speed: 15
   player: {fileID: 0}
   attackRange: 2
   attackCooldown: 1.5
