@@ -4,7 +4,7 @@ using UnityEngine.Audio;
 public class AudioService : IService
 {
     private AudioMixer audioMixer;
-    private const string MusicVolumeParam = "MusicVolume";
+    private const string MusicVolumeParam = "Volume";
     private float currentMusicVolume = 0.75f;
 
     public AudioService(AudioMixer mixer)
@@ -21,7 +21,7 @@ public class AudioService : IService
     {
         currentMusicVolume = Mathf.Clamp01(volume);
         audioMixer.SetFloat(MusicVolumeParam, Mathf.Log10(currentMusicVolume) * 20f);
-        PlayerPrefs.SetFloat("MusicVolume", currentMusicVolume);
+        PlayerPrefs.SetFloat("Volume", currentMusicVolume);
     }
 
     public float GetMusicVolume()
@@ -31,7 +31,7 @@ public class AudioService : IService
 
     private void LoadVolumeSettings()
     {
-        currentMusicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.75f);
+        currentMusicVolume = PlayerPrefs.GetFloat("Volume", 0.75f);
         SetMusicVolume(currentMusicVolume);
     }
 

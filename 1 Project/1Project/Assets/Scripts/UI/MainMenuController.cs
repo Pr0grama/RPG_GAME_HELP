@@ -87,7 +87,6 @@ public class GameMenuController
     {
         isMenuOpen = !isMenuOpen;
         view.MenuPanel.SetActive(isMenuOpen);
-
         Time.timeScale = isMenuOpen ? 0f : 1f;
         Cursor.lockState = isMenuOpen ? CursorLockMode.None : CursorLockMode.Locked;
     }
@@ -95,18 +94,35 @@ public class GameMenuController
     private void OnMainMenuClicked()
     {
         Time.timeScale = 1f;
+
+        // Находим и уничтожаем GameplayEntryPoint перед переходом
+        var entryPoint = Object.FindObjectOfType<GameplayEntryPoint>();
+        if (entryPoint != null)
+        {
+            entryPoint.Cleanup();
+            Object.Destroy(entryPoint.gameObject);
+        }
+
+        // Также уничтожаем сам Canvas, если он еще существует
+        if (view != null)
+        {
+            Object.Destroy(view.gameObject);
+        }
+
         sceneLoader.LoadScene("MainMenu");
     }
 
     private void OnSaveClicked()
     {
-        // Собираем данные игры
         var gameData = new SaveLoadService.GameData();
-
-        // TODO: Заполнить данными из игры
-        // gameData.playerHealth = ...;
-        // gameData.playerPosition = ...;
-
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            Health health = player.GetComponent<Health>();
+            if (health != null)
+                gameData.playerHealth = (int)health.currentHealth;
+            gameData.playerPosition = player.transform.position;
+        }
         saveLoad.SaveGame(gameData);
         Debug.Log("Игра сохранена!");
     }
@@ -116,7 +132,14 @@ public class GameMenuController
         var gameData = saveLoad.LoadGame();
         if (gameData != null)
         {
-            // TODO: Применить данные к игре
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                Health health = player.GetComponent<Health>();
+                if (health != null)
+                    health.currentHealth = gameData.playerHealth;
+                player.transform.position = gameData.playerPosition;
+            }
             Debug.Log("Игра загружена!");
         }
         else

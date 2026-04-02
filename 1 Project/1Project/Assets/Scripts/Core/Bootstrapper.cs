@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.Audio;
 
 public class Bootstrapper : MonoBehaviour
@@ -6,6 +6,7 @@ public class Bootstrapper : MonoBehaviour
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private GameObject mainMenuEntryPointPrefab;
     [SerializeField] private GameObject gameplayEntryPointPrefab;
+    [SerializeField] private GameObject mainMenuCanvasPrefab; // в†ђ Р”РћР‘РђР’РРўР¬
 
     private ServiceLocator services;
 
@@ -19,7 +20,6 @@ public class Bootstrapper : MonoBehaviour
     {
         services = new ServiceLocator();
 
-        // Регистрируем сервисы
         var audioService = new AudioService(audioMixer);
         audioService.Initialize();
         services.Register<AudioService>(audioService);
@@ -39,4 +39,6 @@ public class Bootstrapper : MonoBehaviour
     {
         return sceneName == "MainMenu" ? mainMenuEntryPointPrefab : gameplayEntryPointPrefab;
     }
+
+    public GameObject GetMainMenuCanvasPrefab() => mainMenuCanvasPrefab; // в†ђ Р”РћР‘РђР’РРўР¬
 }

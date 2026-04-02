@@ -44,6 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04747eaf9c0bdd64080bd0bec80253a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameplayEntryPoint
-  gameMenuView: {fileID: 1017681913496337867, guid: 28478f2c99270394fa1cf84e5e99bff6, type: 3}
+  gameMenuViewPrefab: {fileID: 1017681913496337867, guid: 28478f2c99270394fa1cf84e5e99bff6, type: 3}
   playerPrefab: {fileID: 370775853444986459, guid: 00c8d72451f08c94fb183ff06afdf471, type: 3}
   playerSpawnPoint: {fileID: 0}

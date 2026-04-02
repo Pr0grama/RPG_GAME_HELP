@@ -44,4 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 482db872ba5c55149a05aee133545baf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuEntryPoint
-  mainMenuView: {fileID: 1912046524524951618, guid: 18fede014b9a4c64888aaac89d73e778, type: 3}
+  mainMenuViewPrefab: {fileID: 1912046524524951618, guid: 18fede014b9a4c64888aaac89d73e778, type: 3}
