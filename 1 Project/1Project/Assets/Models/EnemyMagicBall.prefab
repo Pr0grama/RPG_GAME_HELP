@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4867020375053748592}
   - component: {fileID: 6762854994753134696}
   - component: {fileID: 5162523958058830077}
-  - component: {fileID: 166946805132495358}
+  - component: {fileID: 7563567711277044227}
   m_Layer: 0
   m_Name: EnemyMagicBall
   m_TagString: Untagged
@@ -236,7 +236,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &166946805132495358
+--- !u!114 &7563567711277044227
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -245,10 +245,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6718499119148694923}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7dcb35796a66ae4b844ecc05242ad8b, type: 3}
+  m_Script: {fileID: 11500000, guid: af9837e9104092549b94cebdaf1b6d50, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MagicProjectile
-  speed: 20
-  damage: 30
-  lifetime: 3
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyProjectile
+  speed: 15
+  damage: 15
+  lifetime: 5
   impactEffect: {fileID: 0}
+  target: {fileID: 0}

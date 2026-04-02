@@ -6,58 +6,44 @@ public class EnemyProjectile : MonoBehaviour
     public float damage = 15f;
     public float lifetime = 5f;
     public GameObject impactEffect;
-    public Transform target; // Цель (игрок)
 
     private Vector3 direction;
 
     void Start()
     {
-        if (target != null)
-        {
-            // Направляемся к игроку
-            direction = (target.position - transform.position).normalized;
-        }
-        else
-        {
-            // Если цели нет, летим вперед
-            direction = transform.forward;
-        }
+        // Летим вперед
+        direction = transform.forward;
 
+        // Уничтожаем через время
         Destroy(gameObject, lifetime);
     }
 
     void Update()
     {
         transform.position += direction * speed * Time.deltaTime;
-
-        // Поворачиваем снаряд в направлении движения
-        if (direction != Vector3.zero)
-        {
-            transform.rotation = Quaternion.LookRotation(direction);
-        }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        // Проверяем, попали ли в игрока
+        // ПРОВЕРКА: если у объекта есть тег "Player" - наносим урон
         if (other.CompareTag("Player"))
         {
             Health playerHealth = other.GetComponent<Health>();
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damage, DamageType.Magical);
-                Debug.Log($"🏹 Снаряд врага нанес {damage} урона игроку!");
+                Debug.Log($"🏹 Снаряд попал в игрока! Урон: {damage}");
             }
 
             // Эффект попадания
             if (impactEffect != null)
                 Instantiate(impactEffect, transform.position, Quaternion.identity);
 
+            // Уничтожаем снаряд
             Destroy(gameObject);
         }
-
-        // Столкновение с препятствиями
-        if (other.CompareTag("Wall") || other.CompareTag("Obstacle"))
+        // Если попали в стену или другой объект (не врага) - просто уничтожаем
+        else if (!other.CompareTag("Enemy"))
         {
             if (impactEffect != null)
                 Instantiate(impactEffect, transform.position, Quaternion.identity);

@@ -227,14 +227,15 @@ public class EnemyAI : MonoBehaviour
             // Создаем снаряд
             GameObject projectile = Instantiate(projectilePrefab, shootPoint.position, shootPoint.rotation);
 
-            // Настраиваем компонент снаряда
+            // Настраиваем компонент снаряда (ТОЛЬКО damage и speed!)
             EnemyProjectile projScript = projectile.GetComponent<EnemyProjectile>();
             if (projScript == null)
                 projScript = projectile.AddComponent<EnemyProjectile>();
 
             projScript.damage = rangedDamage;
             projScript.speed = projectileSpeed;
-            projScript.target = player;
+            // projScript.target = player;      // ← МОЖНО УДАЛИТЬ
+            // projScript.SetOwner(gameObject); // ← МОЖНО УДАЛИТЬ
 
             Debug.Log($"🏹 {gameObject.name} выпустил снаряд с уроном {rangedDamage}");
         }
