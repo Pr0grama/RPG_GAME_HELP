@@ -282,7 +282,7 @@ GameObject:
   - component: {fileID: 8183531846114589206}
   - component: {fileID: 1211418892673899715}
   - component: {fileID: 8691188610865977841}
-  - component: {fileID: 914039275030967538}
+  - component: {fileID: 8352426981389449024}
   m_Layer: 6
   m_Name: Enemy
   m_TagString: Enemy
@@ -427,7 +427,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHealth: 50
   currentHealth: 0
---- !u!114 &914039275030967538
+--- !u!114 &8352426981389449024
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -630,20 +630,24 @@ PrefabInstance:
       propertyPath: m_Name
       value: Running
       objectReference: {fileID: 0}
+    - target: {fileID: 2346275881050335890, guid: 53ae9d66c02a8d742bb3c56f1e179082, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 53ae9d66c02a8d742bb3c56f1e179082, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3080456438898518007}
+      addedObject: {fileID: 6155793457759874539}
   m_SourcePrefab: {fileID: 100100000, guid: 53ae9d66c02a8d742bb3c56f1e179082, type: 3}
 --- !u!1 &3977301491232526 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 53ae9d66c02a8d742bb3c56f1e179082, type: 3}
   m_PrefabInstance: {fileID: 923036181724238431}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &3080456438898518007
+--- !u!95 &6155793457759874539
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0

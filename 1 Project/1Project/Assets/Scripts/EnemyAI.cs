@@ -22,13 +22,13 @@ public class EnemyAI : MonoBehaviour
     public float rangedAttackRange = 10f;
     public float rangedAttackCooldown = 2f;
     public float rangedDamage = 15f;
-    public GameObject projectilePrefab;      // Префаб снаряда
-    public Transform shootPoint;              // Точка вылета снаряда
+    public GameObject projectilePrefab;
+    public Transform shootPoint;
     public float projectileSpeed = 15f;
 
     [Header("Настройки движения для дальнего боя")]
-    public float minDistanceToPlayer = 5f;    // Минимальная дистанция до игрока
-    public float maxDistanceToPlayer = 8f;    // Максимальная дистанция до игрока
+    public float minDistanceToPlayer = 5f;
+    public float maxDistanceToPlayer = 8f;
 
     private float nextAttackTime = 0f;
     private Health health;
@@ -40,7 +40,6 @@ public class EnemyAI : MonoBehaviour
         health = GetComponent<Health>();
         animator = GetComponent<Animator>();
 
-        // Находим игрока
         if (player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -48,13 +47,11 @@ public class EnemyAI : MonoBehaviour
                 player = playerObj.transform;
         }
 
-        // Если нет точки стрельбы, используем позицию врага
         if (shootPoint == null && enemyType == EnemyType.Ranged)
         {
             shootPoint = transform;
         }
 
-        // Подписываемся на смерть для анимации
         if (health != null)
         {
             health.onDeath += OnDeath;
@@ -77,60 +74,56 @@ public class EnemyAI : MonoBehaviour
                 break;
         }
 
-        // Обновляем анимацию движения
-        UpdateMovementAnimation();
+        if (Time.frameCount % 60 == 0 && animator != null)
+        {
+            Debug.Log($"🎬 {gameObject.name}: speed в аниматоре = {animator.GetFloat("speed")}");
+        }
     }
 
     void UpdateMeleeBehavior(float distance)
     {
+        float currentSpeed = 0f;
+
         if (distance > attackRange)
         {
-            // Двигаемся к игроку
             MoveTowardsPlayer();
-
-            // Анимация ходьбы
-            if (animator != null)
-                animator.SetBool("isWalking", true);
+            currentSpeed = speed; // Бежим к игроку
+            Debug.Log($"🏃 {gameObject.name}: ДВИГАЕТСЯ, скорость = {currentSpeed}"); // ВРЕМЕННО
         }
         else
         {
-            // Останавливаемся
-            if (animator != null)
-                animator.SetBool("isWalking", false);
-
             // В зоне атаки
+            Debug.Log($"🧍 {gameObject.name}: СТОИТ, скорость = {currentSpeed}"); // ВРЕМЕННО
             if (Time.time >= nextAttackTime && !isAttacking)
             {
                 AttackPlayer();
                 nextAttackTime = Time.time + attackCooldown;
             }
         }
+
+        // Обновляем анимацию скорости
+        UpdateMovementAnimation(currentSpeed);
     }
 
     void UpdateRangedBehavior(float distance)
     {
-        // Дальний враг держит дистанцию
+        float currentSpeed = 0f;
+
         if (distance > maxDistanceToPlayer)
         {
-            // Приближаемся к игроку
             MoveTowardsPlayer();
-            if (animator != null)
-                animator.SetBool("isWalking", true);
+            currentSpeed = speed;
         }
         else if (distance < minDistanceToPlayer)
         {
-            // Отходим от игрока
             MoveAwayFromPlayer();
-            if (animator != null)
-                animator.SetBool("isWalking", true);
+            currentSpeed = speed;
         }
         else
         {
             // На оптимальной дистанции - стоим
-            if (animator != null)
-                animator.SetBool("isWalking", false);
+            currentSpeed = 0f;
 
-            // Атакуем, если дистанция позволяет
             if (distance <= rangedAttackRange && Time.time >= nextAttackTime && !isAttacking)
             {
                 RangedAttack();
@@ -138,19 +131,18 @@ public class EnemyAI : MonoBehaviour
             }
         }
 
-        // Поворачиваемся к игроку
         LookAtPlayer();
+
+        // Обновляем анимацию скорости
+        UpdateMovementAnimation(currentSpeed);
     }
 
     void MoveTowardsPlayer()
     {
         Vector3 direction = (player.position - transform.position).normalized;
         Vector3 newPosition = transform.position + direction * speed * Time.deltaTime;
-
-        // Сохраняем Y координату
         newPosition.y = transform.position.y;
         transform.position = newPosition;
-
         LookAtPlayer();
     }
 
@@ -160,7 +152,6 @@ public class EnemyAI : MonoBehaviour
         Vector3 newPosition = transform.position + direction * speed * Time.deltaTime;
         newPosition.y = transform.position.y;
         transform.position = newPosition;
-
         LookAtPlayer();
     }
 
@@ -183,14 +174,14 @@ public class EnemyAI : MonoBehaviour
     {
         isAttacking = true;
 
-        // Анимация атаки
         if (animator != null)
             animator.SetTrigger("attack");
 
-        // Небольшая задержка перед уроном (синхронизация с анимацией)
+        // Останавливаем анимацию движения во время атаки
+        UpdateMovementAnimation(0f);
+
         yield return new WaitForSeconds(0.3f);
 
-        // Проверяем, что игрок все еще в радиусе атаки
         float distance = Vector3.Distance(transform.position, player.position);
         if (distance <= attackRange)
         {
@@ -215,27 +206,23 @@ public class EnemyAI : MonoBehaviour
     {
         isAttacking = true;
 
-        // Анимация атаки
         if (animator != null)
             animator.SetTrigger("attack");
 
-        // Задержка для синхронизации с анимацией
+        // Останавливаем анимацию движения во время атаки
+        UpdateMovementAnimation(0f);
+
         yield return new WaitForSeconds(0.2f);
 
         if (projectilePrefab != null && shootPoint != null)
         {
-            // Создаем снаряд
             GameObject projectile = Instantiate(projectilePrefab, shootPoint.position, shootPoint.rotation);
-
-            // Настраиваем компонент снаряда (ТОЛЬКО damage и speed!)
             EnemyProjectile projScript = projectile.GetComponent<EnemyProjectile>();
             if (projScript == null)
                 projScript = projectile.AddComponent<EnemyProjectile>();
 
             projScript.damage = rangedDamage;
             projScript.speed = projectileSpeed;
-            // projScript.target = player;      // ← МОЖНО УДАЛИТЬ
-            // projScript.SetOwner(gameObject); // ← МОЖНО УДАЛИТЬ
 
             Debug.Log($"🏹 {gameObject.name} выпустил снаряд с уроном {rangedDamage}");
         }
@@ -248,15 +235,14 @@ public class EnemyAI : MonoBehaviour
         isAttacking = false;
     }
 
-    void UpdateMovementAnimation()
+    // Обновленный метод анимации - только speed
+    void UpdateMovementAnimation(float currentSpeed)
     {
         if (animator != null)
         {
-            // Получаем текущую скорость движения
-            float currentSpeed = GetComponent<Rigidbody>() != null ?
-                GetComponent<Rigidbody>().linearVelocity.magnitude : speed;
-
-            animator.SetFloat("speed", currentSpeed);
+            // Нормализуем скорость (максимум = speed)
+            float normalizedSpeed = currentSpeed / speed;
+            animator.SetFloat("speed", normalizedSpeed);
         }
     }
 
@@ -265,10 +251,7 @@ public class EnemyAI : MonoBehaviour
         if (animator != null)
             animator.SetTrigger("death");
 
-        // Отключаем скрипт, чтобы враг не двигался после смерти
         enabled = false;
-
-        // Уничтожаем объект через время (для проигрывания анимации смерти)
         Destroy(gameObject, 2f);
     }
 
