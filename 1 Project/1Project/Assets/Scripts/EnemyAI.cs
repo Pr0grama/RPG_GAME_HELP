@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public enum EnemyType
 {
@@ -38,20 +39,50 @@ public class EnemyAI : MonoBehaviour
     private void Start()
     {
         health = GetComponent<Health>();
+
+        // ИЩЕМ ANIMATOR НА СЕБЕ ИЛИ НА ДОЧЕРНИХ ОБЪЕКТАХ
         animator = GetComponent<Animator>();
 
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+            if (animator != null)
+            {
+                Debug.Log($"✅ {gameObject.name}: Animator найден на дочернем объекте: {animator.gameObject.name}");
+            }
+        }
+
+        if (animator == null)
+        {
+            Debug.LogWarning($"⚠️ {gameObject.name}: Animator не найден ни на себе, ни на дочерних объектах! Анимации не будут работать.");
+        }
+        else
+        {
+            Debug.Log($"✅ {gameObject.name}: Animator успешно загружен, Controller: {animator.runtimeAnimatorController?.name}");
+        }
+
+        // Находим игрока
         if (player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
+            {
                 player = playerObj.transform;
+                Debug.Log($"✅ {gameObject.name} нашёл игрока: {player.name}");
+            }
+            else
+            {
+                Debug.LogError($"❌ {gameObject.name}: Игрок с тегом 'Player' не найден!");
+            }
         }
 
+        // Если нет точки стрельбы, используем позицию врага
         if (shootPoint == null && enemyType == EnemyType.Ranged)
         {
             shootPoint = transform;
         }
 
+        // Подписываемся на смерть для анимации
         if (health != null)
         {
             health.onDeath += OnDeath;
@@ -73,11 +104,6 @@ public class EnemyAI : MonoBehaviour
                 UpdateRangedBehavior(distance);
                 break;
         }
-
-        if (Time.frameCount % 60 == 0 && animator != null)
-        {
-            Debug.Log($"🎬 {gameObject.name}: speed в аниматоре = {animator.GetFloat("speed")}");
-        }
     }
 
     void UpdateMeleeBehavior(float distance)
@@ -87,13 +113,10 @@ public class EnemyAI : MonoBehaviour
         if (distance > attackRange)
         {
             MoveTowardsPlayer();
-            currentSpeed = speed; // Бежим к игроку
-            Debug.Log($"🏃 {gameObject.name}: ДВИГАЕТСЯ, скорость = {currentSpeed}"); // ВРЕМЕННО
+            currentSpeed = speed;
         }
         else
         {
-            // В зоне атаки
-            Debug.Log($"🧍 {gameObject.name}: СТОИТ, скорость = {currentSpeed}"); // ВРЕМЕННО
             if (Time.time >= nextAttackTime && !isAttacking)
             {
                 AttackPlayer();
@@ -101,7 +124,6 @@ public class EnemyAI : MonoBehaviour
             }
         }
 
-        // Обновляем анимацию скорости
         UpdateMovementAnimation(currentSpeed);
     }
 
@@ -121,7 +143,6 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            // На оптимальной дистанции - стоим
             currentSpeed = 0f;
 
             if (distance <= rangedAttackRange && Time.time >= nextAttackTime && !isAttacking)
@@ -132,9 +153,26 @@ public class EnemyAI : MonoBehaviour
         }
 
         LookAtPlayer();
-
-        // Обновляем анимацию скорости
         UpdateMovementAnimation(currentSpeed);
+    }
+
+    private void OnEnable()
+    {
+        // Подписываемся на событие получения урона
+        if (health != null)
+        {
+            // Можно добавить событие в Health, но пока просто проверяем в Update
+        }
+    }
+
+    // Добавьте публичный метод для вызова анимации урона извне
+    public void TriggerHitAnimation()
+    {
+        if (animator != null)
+        {
+            animator.SetTrigger("hit");
+            Debug.Log($"🤕 {gameObject.name}: получен урон, анимация hit!");
+        }
     }
 
     void MoveTowardsPlayer()
@@ -170,14 +208,13 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(PerformMeleeAttack());
     }
 
-    System.Collections.IEnumerator PerformMeleeAttack()
+    IEnumerator PerformMeleeAttack()
     {
         isAttacking = true;
 
         if (animator != null)
             animator.SetTrigger("attack");
 
-        // Останавливаем анимацию движения во время атаки
         UpdateMovementAnimation(0f);
 
         yield return new WaitForSeconds(0.3f);
@@ -202,14 +239,13 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(PerformRangedAttack());
     }
 
-    System.Collections.IEnumerator PerformRangedAttack()
+    IEnumerator PerformRangedAttack()
     {
         isAttacking = true;
 
         if (animator != null)
             animator.SetTrigger("attack");
 
-        // Останавливаем анимацию движения во время атаки
         UpdateMovementAnimation(0f);
 
         yield return new WaitForSeconds(0.2f);
@@ -235,14 +271,11 @@ public class EnemyAI : MonoBehaviour
         isAttacking = false;
     }
 
-    // Обновленный метод анимации - только speed
     void UpdateMovementAnimation(float currentSpeed)
     {
         if (animator != null)
         {
-            // Нормализуем скорость (максимум = speed)
-            float normalizedSpeed = currentSpeed / speed;
-            animator.SetFloat("speed", normalizedSpeed);
+            animator.SetFloat("speed", currentSpeed);
         }
     }
 
@@ -252,7 +285,6 @@ public class EnemyAI : MonoBehaviour
             animator.SetTrigger("death");
 
         enabled = false;
-        Destroy(gameObject, 2f);
     }
 
     private void OnDrawGizmosSelected()

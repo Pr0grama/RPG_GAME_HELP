@@ -427,6 +427,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHealth: 50
   currentHealth: 0
+  deathAnimationDelay: 5
+  invulnerabilityDuration: 0.5
 --- !u!114 &8352426981389449024
 MonoBehaviour:
   m_ObjectHideFlags: 0

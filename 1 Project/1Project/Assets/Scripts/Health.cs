@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public enum DamageType
 {
@@ -12,52 +13,100 @@ public class Health : MonoBehaviour
     public float currentHealth;
     public System.Action onDeath;
 
-    // Ссылка на скрипт анимаций игрока
-    private PlayerAnimations playerAnimations;
+    public float deathAnimationDelay = 600f;
+
+    private Animator animator;
+    private bool isDead = false;
+    private bool isInvulnerable = false;
+    public float invulnerabilityDuration = 0.5f;
+
+    private Rigidbody rb;
 
     private void Start()
     {
         currentHealth = maxHealth;
-
-        // Пытаемся получить компонент анимаций (если он есть на этом объекте)
-        playerAnimations = GetComponent<PlayerAnimations>();
-
-        // Если не нашли на этом объекте, ищем в детях (на случай, если аниматор на модели)
-        if (playerAnimations == null)
+        animator = GetComponent<Animator>();
+        if (animator == null)
         {
-            playerAnimations = GetComponentInChildren<PlayerAnimations>();
+            animator = GetComponentInChildren<Animator>();
         }
+
+        rb = GetComponent<Rigidbody>();
     }
 
     public void TakeDamage(float amount, DamageType damageType)
     {
-        currentHealth -= amount;
-        Debug.Log(gameObject.name + " получил урон: " + amount + ", тип: " + damageType);
+        if (isDead) return;
+        if (isInvulnerable) return;
 
-        // ✅ Запускаем анимацию получения урона
-        if (playerAnimations != null)
+        currentHealth -= amount;
+        Debug.Log($"{gameObject.name} получил урон: {amount}, осталось: {currentHealth}");
+
+        if (animator != null)
         {
-            playerAnimations.TriggerHitAnimation();
+            animator.SetTrigger("hit");
         }
 
-        if (currentHealth <= 0)
+        StartCoroutine(InvulnerabilityCoroutine());
+
+        if (currentHealth <= 0 && !isDead)
         {
             Die();
         }
     }
 
+    private IEnumerator InvulnerabilityCoroutine()
+    {
+        isInvulnerable = true;
+        yield return new WaitForSeconds(invulnerabilityDuration);
+        isInvulnerable = false;
+    }
+
     private void Die()
     {
-        Debug.Log(gameObject.name + " погиб");
+        if (isDead) return;
+        isDead = true;
+
+        Debug.Log($"💀 [HEALTH] {gameObject.name}: Die() вызван в {Time.time}");
+        Debug.Log($"💀 [HEALTH] deathAnimationDelay = {deathAnimationDelay}");
+
+        if (animator != null)
+        {
+            animator.SetTrigger("death");
+            Debug.Log($"💀 [HEALTH] Анимация death запущена");
+        }
 
         if (onDeath != null)
+        {
             onDeath.Invoke();
+            Debug.Log($"💀 [HEALTH] onDeath событие вызвано");
+        }
 
-        // Для врагов — уничтожить
         if (gameObject.CompareTag("Enemy"))
         {
-            Destroy(gameObject);
+            EnemyAI enemyAI = GetComponent<EnemyAI>();
+            if (enemyAI != null)
+            {
+                enemyAI.enabled = false;
+                Debug.Log($"💀 [HEALTH] EnemyAI отключен");
+            }
+
+            if (rb != null)
+            {
+                rb.isKinematic = true;
+                rb.linearVelocity = Vector3.zero;
+                Debug.Log($"💀 [HEALTH] Физика заморожена");
+            }
+
+            float destroyTime = Time.time + deathAnimationDelay;
+            Debug.Log($"⏰ [HEALTH] {gameObject.name}: будет уничтожен через {deathAnimationDelay} секунд (в {destroyTime})");
+
+            Destroy(gameObject, deathAnimationDelay);
         }
-        // Для игрока — не уничтожаем, а активируем Game Over
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log($"🗑️ [HEALTH] {gameObject.name}: OnDestroy вызван в {Time.time}!");
     }
 }
