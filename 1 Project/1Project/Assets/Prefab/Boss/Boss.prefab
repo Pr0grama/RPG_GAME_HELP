@@ -285,7 +285,7 @@ GameObject:
   - component: {fileID: 8352426981389449024}
   - component: {fileID: 4865365443696384555}
   m_Layer: 6
-  m_Name: Enemy
+  m_Name: Boss
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -468,7 +468,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09761f0fa704d7243a34fe2cd0fb582f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossStateMachine
-  speed: 2
+  speed: 5
   attackRange: 3
   attackDamage: 25
   attackCooldown: 2
@@ -677,7 +677,7 @@ Animator:
   m_GameObject: {fileID: 3913416354335833813}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 37c71c2eb0ca3d5428702d428efb35b0, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
