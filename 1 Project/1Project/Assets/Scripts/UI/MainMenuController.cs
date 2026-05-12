@@ -53,14 +53,14 @@ public class MainMenuController
 public class GameMenuController
 {
     private GameMenuView view;
-    private SaveLoadService saveLoad;
+    private IPlayerInteractor interactor;
     private SceneLoader sceneLoader;
     private bool isMenuOpen = false;
 
-    public GameMenuController(GameMenuView view, SaveLoadService save, SceneLoader loader)
+    public GameMenuController(GameMenuView view, IPlayerInteractor interactor, SceneLoader loader)
     {
         this.view = view;
-        this.saveLoad = save;
+        this.interactor = interactor;
         this.sceneLoader = loader;
 
         SetupButtons();
@@ -91,6 +91,30 @@ public class GameMenuController
         Cursor.lockState = isMenuOpen ? CursorLockMode.None : CursorLockMode.Locked;
     }
 
+    private void OnSaveClicked()
+    {
+        interactor.SaveCurrentState();
+        Debug.Log("?? Игра сохранена через UI меню");
+
+        // Можно показать уведомление
+        // ShowNotification("Игра сохранена!");
+    }
+
+    private void OnLoadClicked()
+    {
+        if (interactor.HasSave())
+        {
+            interactor.LoadLastState();
+            Debug.Log("?? Игра загружена через UI меню");
+            // ShowNotification("Игра загружена!");
+        }
+        else
+        {
+            Debug.LogWarning("?? Нет сохранений для загрузки!");
+            // ShowNotification("Нет сохранений!");
+        }
+    }
+
     private void OnMainMenuClicked()
     {
         Time.timeScale = 1f;
@@ -103,48 +127,12 @@ public class GameMenuController
             Object.Destroy(entryPoint.gameObject);
         }
 
-        // Также уничтожаем сам Canvas, если он еще существует
+        // Также уничтожаем сам Canvas
         if (view != null)
         {
             Object.Destroy(view.gameObject);
         }
 
         sceneLoader.LoadScene("MainMenu");
-    }
-
-    private void OnSaveClicked()
-    {
-        var gameData = new SaveLoadService.GameData();
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            Health health = player.GetComponent<Health>();
-            if (health != null)
-                gameData.playerHealth = (int)health.currentHealth;
-            gameData.playerPosition = player.transform.position;
-        }
-        saveLoad.SaveGame(gameData);
-        Debug.Log("Игра сохранена!");
-    }
-
-    private void OnLoadClicked()
-    {
-        var gameData = saveLoad.LoadGame();
-        if (gameData != null)
-        {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                Health health = player.GetComponent<Health>();
-                if (health != null)
-                    health.currentHealth = gameData.playerHealth;
-                player.transform.position = gameData.playerPosition;
-            }
-            Debug.Log("Игра загружена!");
-        }
-        else
-        {
-            Debug.Log("Нет сохранений!");
-        }
     }
 }

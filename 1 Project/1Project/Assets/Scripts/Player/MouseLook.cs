@@ -9,7 +9,6 @@ public class MouseLook : MonoBehaviour
 
     private void Start()
     {
-        // Блокируем курсор в центре экрана
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -18,12 +17,23 @@ public class MouseLook : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // Поворот камеры вверх-вниз
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -80f, 80f);
+
+        // Поворот камеры (вертикаль)
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        // Поворот игрока влево-вправо
-        playerBody.Rotate(Vector3.up * mouseX);
+        // Поворот тела игрока (горизонталь) - только если тело существует
+        if (playerBody != null)
+        {
+            playerBody.Rotate(Vector3.up * mouseX);
+        }
+    }
+
+    public float GetXRotation() => xRotation;
+    public void SetXRotation(float value)
+    {
+        xRotation = value;
+        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
 }

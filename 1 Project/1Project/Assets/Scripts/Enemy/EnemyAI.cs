@@ -284,6 +284,10 @@ public class EnemyAI : MonoBehaviour
         if (animator != null)
             animator.SetTrigger("death");
 
+        // Добавить увеличение счётчика убийств
+        if (GameStats.Instance != null)
+            GameStats.Instance.AddKill();
+
         enabled = false;
     }
 

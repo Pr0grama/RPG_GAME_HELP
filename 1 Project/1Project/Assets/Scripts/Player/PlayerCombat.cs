@@ -7,13 +7,13 @@ public class PlayerCombat : MonoBehaviour
     public Transform attackPoint;
     public float attackRange = 2f;
     public LayerMask enemyLayers;
-    public GameObject magicProjectilePrefab; // префаб снаряда
-    public Transform magicSpawnPoint;        // откуда вылетает магия
+    public GameObject magicProjectilePrefab;
+    public Transform magicSpawnPoint;
     public MagicCooldownUI cooldownUI;
 
     [Header("Magic Cooldown")]
-    public float magicCooldown = 2f;         // длительность перезарядки в секундах
-    private float nextMagicTime = 0f;        // когда можно будет снова кастовать
+    public float magicCooldown = 2f;
+    private float nextMagicTime = 0f;
 
     private Animator animator;
 
@@ -24,32 +24,24 @@ public class PlayerCombat : MonoBehaviour
 
     private void Update()
     {
-        // Физическая атака (левая кнопка мыши)
         if (Input.GetMouseButtonDown(0))
         {
             PhysicalAttack();
         }
 
-        // Магическая атака (правая кнопка мыши) с проверкой кулдауна
         if (Input.GetMouseButtonDown(1) && Time.time >= nextMagicTime)
         {
             MagicalAttack();
-            nextMagicTime = Time.time + magicCooldown; // устанавливаем время следующей возможной атаки
-
+            nextMagicTime = Time.time + magicCooldown;
             if (cooldownUI != null)
-                cooldownUI.StartCooldown(); // ← запуск визуала
+                cooldownUI.StartCooldown();
         }
     }
 
     void PhysicalAttack()
     {
-        // Запускаем анимацию
         animator.SetTrigger("attack");
-
-        // Находим врагов в зоне поражения
         Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
-
-        // Наносим урон каждому врагу
         foreach (Collider enemy in hitEnemies)
         {
             Health enemyHealth = enemy.GetComponent<Health>();
@@ -64,17 +56,23 @@ public class PlayerCombat : MonoBehaviour
     void MagicalAttack()
     {
         Debug.Log("✨ Магическая атака!");
-
         if (magicProjectilePrefab != null && magicSpawnPoint != null)
         {
-            // Создаём снаряд
-            GameObject projectile = Instantiate(magicProjectilePrefab,
-                                               magicSpawnPoint.position,
-                                               magicSpawnPoint.rotation);
+            Instantiate(magicProjectilePrefab, magicSpawnPoint.position, magicSpawnPoint.rotation);
         }
     }
 
-    // Для визуализации зоны атаки в редакторе
+    // ДОБАВИТЬ ЭТИ МЕТОДЫ:
+    public float GetNextMagicTime()
+    {
+        return nextMagicTime;
+    }
+
+    public void SetNextMagicTime(float value)
+    {
+        nextMagicTime = value;
+    }
+
     private void OnDrawGizmosSelected()
     {
         if (attackPoint == null) return;

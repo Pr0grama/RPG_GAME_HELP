@@ -283,6 +283,7 @@ GameObject:
   - component: {fileID: 1211418892673899715}
   - component: {fileID: 8691188610865977841}
   - component: {fileID: 8352426981389449024}
+  - component: {fileID: 1472431888532891780}
   m_Layer: 6
   m_Name: Enemy
   m_TagString: Enemy
@@ -436,7 +437,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6825791075331695195}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db46f59200f6d0340991e5e0abc36b2e, type: 3}
   m_Name: 
@@ -447,6 +448,33 @@ MonoBehaviour:
   attackRange: 2
   attackCooldown: 1.5
   damage: 10
+  rangedAttackRange: 10
+  rangedAttackCooldown: 2
+  rangedDamage: 15
+  projectilePrefab: {fileID: 0}
+  shootPoint: {fileID: 0}
+  projectileSpeed: 15
+  minDistanceToPlayer: 5
+  maxDistanceToPlayer: 8
+--- !u!114 &1472431888532891780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6825791075331695195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5739e272a1fa3e40b4918ffab47068a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStateMachine
+  speed: 8
+  attackRange: 2
+  attackCooldown: 1.5
+  damage: 10
+  fleeHealthThreshold: 0.3
+  isAggressive: 0
+  isRanged: 0
   rangedAttackRange: 10
   rangedAttackCooldown: 2
   rangedDamage: 15
