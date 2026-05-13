@@ -21,11 +21,6 @@ public class EnemySpawner : MonoBehaviour
     public int maxEnemies = 20;
     public bool spawnRandomType = true;
 
-    [Header("Настройки оружия")]
-    public bool randomWeapon = true;
-    [Range(0, 1)] public float swordChance = 0.5f;
-    [Range(0, 1)] public float staffChance = 0.5f;
-
     private int currentEnemyCount = 0;
     private int currentTypeIndex = 0;
 
@@ -45,7 +40,6 @@ public class EnemySpawner : MonoBehaviour
             {
                 SpawnEnemy();
             }
-
             yield return new WaitForSeconds(spawnInterval);
         }
     }
@@ -59,22 +53,18 @@ public class EnemySpawner : MonoBehaviour
         }
 
         // Выбираем тип врага
-        EnemyTypeSettings selectedType = null;
-
-        if (spawnRandomType)
-        {
-            selectedType = GetRandomEnemyType();
-        }
-        else
-        {
-            selectedType = enemyTypes[currentTypeIndex];
-            currentTypeIndex = (currentTypeIndex + 1) % enemyTypes.Count;
-        }
+        EnemyTypeSettings selectedType = spawnRandomType ? GetRandomEnemyType() : enemyTypes[currentTypeIndex];
 
         if (selectedType == null || selectedType.enemyPrefab == null)
         {
             Debug.LogWarning($"Префаб для типа {selectedType?.enemyType} не назначен!");
             return;
+        }
+
+        // Переключаем индекс для последовательного спавна
+        if (!spawnRandomType)
+        {
+            currentTypeIndex = (currentTypeIndex + 1) % enemyTypes.Count;
         }
 
         // Выбираем случайную точку спавна
@@ -84,35 +74,12 @@ public class EnemySpawner : MonoBehaviour
         GameObject newEnemy = Instantiate(selectedType.enemyPrefab, spawnPoint.position, spawnPoint.rotation);
         currentEnemyCount++;
 
-        // ✅ НАСТРАИВАЕМ ТИП ВРАГА через isRanged (убираем enemyType, его нет в EnemyStateMachine)
+        // Настраиваем тип врага (Melee / Ranged)
         EnemyStateMachine enemyAI = newEnemy.GetComponent<EnemyStateMachine>();
         if (enemyAI != null)
         {
-            // Определяем тип по selectedType.enemyType
-            if (selectedType.enemyType == EnemyType.Ranged)
-            {
-                enemyAI.isRanged = true;
-            }
-            else
-            {
-                enemyAI.isRanged = false;
-            }
-        }
-
-        // ✅ ДОБАВЛЯЕМ РАНДОМНОЕ ОРУЖИЕ
-        if (randomWeapon)
-        {
-            WeaponStats weaponStats = newEnemy.GetComponent<WeaponStats>();
-            if (weaponStats != null)
-            {
-                WeaponBuffType randomWeaponType = GetRandomWeaponType();
-                weaponStats.SetWeapon(randomWeaponType);
-                Debug.Log($"🗡️ Спавнен {(selectedType.enemyType == EnemyType.Ranged ? "Дальний" : "Ближний")} с оружием: {randomWeaponType}");
-            }
-            else
-            {
-                Debug.LogWarning($"{newEnemy.name}: Нет компонента WeaponStats!");
-            }
+            enemyAI.isRanged = (selectedType.enemyType == EnemyType.Ranged);
+            Debug.Log($"Спавнен {selectedType.enemyType} враг | isRanged = {enemyAI.isRanged}");
         }
 
         // Подписываемся на смерть
@@ -122,38 +89,17 @@ public class EnemySpawner : MonoBehaviour
             enemyHealth.onDeath += OnEnemyDied;
         }
 
-        Debug.Log($"Спавнен враг типа: {selectedType.enemyType}");
-    }
-
-    // ✅ ВЫБОР СЛУЧАЙНОГО ОРУЖИЯ
-    private WeaponBuffType GetRandomWeaponType()
-    {
-        float random = Random.Range(0f, 1f);
-
-        // Нормализуем шансы (если сумма не равна 1)
-        float total = swordChance + staffChance;
-        float normalizedSwordChance = swordChance / total;
-
-        if (random < normalizedSwordChance)
-        {
-            return WeaponBuffType.Sword;
-        }
-        else
-        {
-            return WeaponBuffType.Staff;
-        }
+        Debug.Log($"✅ Спавнен враг: {selectedType.enemyType}");
     }
 
     private EnemyTypeSettings GetRandomEnemyType()
     {
-        // Вычисляем общий вес
         float totalWeight = 0f;
         foreach (var type in enemyTypes)
         {
             totalWeight += type.spawnWeight;
         }
 
-        // Выбираем случайный вес
         float randomWeight = Random.Range(0f, totalWeight);
         float currentWeight = 0f;
 
@@ -178,30 +124,25 @@ public class EnemySpawner : MonoBehaviour
     public void SpawnSpecificEnemy(EnemyType type)
     {
         var enemySettings = enemyTypes.Find(e => e.enemyType == type);
-        if (enemySettings != null && spawnPoints.Length > 0)
+        if (enemySettings == null || spawnPoints.Length == 0) return;
+
+        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        GameObject newEnemy = Instantiate(enemySettings.enemyPrefab, spawnPoint.position, spawnPoint.rotation);
+        currentEnemyCount++;
+
+        EnemyStateMachine enemyAI = newEnemy.GetComponent<EnemyStateMachine>();
+        if (enemyAI != null)
         {
-            Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-            GameObject newEnemy = Instantiate(enemySettings.enemyPrefab, spawnPoint.position, spawnPoint.rotation);
-            currentEnemyCount++;
-
-            // Настраиваем тип врага
-            EnemyStateMachine enemyAI = newEnemy.GetComponent<EnemyStateMachine>();
-            if (enemyAI != null)
-            {
-                enemyAI.isRanged = (type == EnemyType.Ranged);
-            }
-
-            // Добавляем рандомное оружие
-            if (randomWeapon)
-            {
-                WeaponStats weaponStats = newEnemy.GetComponent<WeaponStats>();
-                if (weaponStats != null)
-                {
-                    WeaponBuffType randomWeaponType = GetRandomWeaponType();
-                    weaponStats.SetWeapon(randomWeaponType);
-                }
-            }
+            enemyAI.isRanged = (type == EnemyType.Ranged);
         }
+
+        Health enemyHealth = newEnemy.GetComponent<Health>();
+        if (enemyHealth != null)
+        {
+            enemyHealth.onDeath += OnEnemyDied;
+        }
+
+        Debug.Log($"✅ Ручной спавн: {type}");
     }
 
     private void Update()
@@ -209,10 +150,6 @@ public class EnemySpawner : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F1))
         {
             Debug.Log($"Врагов сейчас: {currentEnemyCount}/{maxEnemies}");
-            foreach (var type in enemyTypes)
-            {
-                Debug.Log($"- {type.enemyType}: префаб {(type.enemyPrefab != null ? "назначен" : "НЕ назначен")}");
-            }
         }
     }
 }

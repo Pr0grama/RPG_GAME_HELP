@@ -1,145 +1,35 @@
 ﻿using UnityEngine;
 
-public enum WeaponBuffType
-{
-    None,
-    Sword,   // Меч
-    Staff    // Посох
-}
-
 public class WeaponStats : MonoBehaviour
 {
-    [Header("Текущее оружие")]
-    public WeaponBuffType currentWeapon = WeaponBuffType.None;
+    // Пустой скрипт-заглушка, чтобы не было ошибок в спавнере
+    // Если хочешь полностью избавиться — можешь удалить этот компонент с префабов мобов
 
-    [Header("Бонусы для меча")]
-    public float swordSpeedMultiplier = 1.3f;
-    public float swordRangeMultiplier = 0.7f;
-    public float swordDamageMultiplier = 1f;
+    [Header("Система оружия отключена")]
+    [Tooltip("Этот скрипт сейчас ничего не делает")]
+    public bool weaponSystemDisabled = true;
 
-    [Header("Бонусы для посоха")]
-    public float staffSpeedMultiplier = 0.7f;
-    public float staffRangeMultiplier = 1f;
-    public float staffDamageMultiplier = 1.5f;
-
-    [Header("Визуальный индикатор")]
-    public GameObject swordIcon;
-    public GameObject staffIcon;
-    public float iconHeight = 2.5f;
-
-    private GameObject currentIcon;
     private EnemyStateMachine enemyAI;
-    private EnemyType enemyType;
 
-    private float originalSpeed;
-    private float originalAttackRange;
-    private float originalDamage;
-    private float originalRangedAttackRange;
+    private void Awake()
+    {
+        enemyAI = GetComponent<EnemyStateMachine>();
+    }
 
     private void Start()
     {
-        enemyAI = GetComponent<EnemyStateMachine>();
-        if (enemyAI == null) return;
-
-        originalSpeed = enemyAI.speed;
-        originalAttackRange = enemyAI.attackRange;
-        originalDamage = enemyAI.damage;
-        originalRangedAttackRange = enemyAI.rangedAttackRange;
-
-        enemyType = enemyAI.isRanged ? EnemyType.Ranged : EnemyType.Melee;
-
-        ApplyWeaponBonuses();
-        CreateWeaponIcon();
-
-        Debug.Log($"⚔️ {gameObject.name}: экипирован {currentWeapon}, Тип: {enemyType}");
-    }
-
-    // ✅ ПУБЛИЧНЫЙ МЕТОД ДЛЯ ПРИМЕНЕНИЯ БОНУСОВ (вызывается из спавнера)
-    public void ApplyWeaponBonuses()
-    {
-        if (enemyAI == null) enemyAI = GetComponent<EnemyStateMachine>();
-        if (enemyAI == null) return;
-
-        // Сбрасываем статы до исходных
-        enemyAI.speed = originalSpeed;
-        enemyAI.attackRange = originalAttackRange;
-        enemyAI.damage = originalDamage;
-        enemyAI.rangedAttackRange = originalRangedAttackRange;
-
-        if (currentWeapon == WeaponBuffType.None) return;
-
-        if (enemyType == EnemyType.Melee)
+        if (enemyAI != null)
         {
-            if (currentWeapon == WeaponBuffType.Sword)
-            {
-                Debug.Log($"🗡️ {gameObject.name} (Ближний) с мечом: статы без изменений");
-            }
-            else if (currentWeapon == WeaponBuffType.Staff)
-            {
-                enemyAI.speed *= staffSpeedMultiplier;
-                enemyAI.damage *= staffDamageMultiplier;
-                Debug.Log($"🪄 {gameObject.name} (Ближний) с посохом: скорость {enemyAI.speed:F1}, урон {enemyAI.damage:F1}");
-            }
-        }
-        else if (enemyType == EnemyType.Ranged)
-        {
-            if (currentWeapon == WeaponBuffType.Sword)
-            {
-                enemyAI.speed *= swordSpeedMultiplier;
-                enemyAI.rangedAttackRange *= swordRangeMultiplier;
-                Debug.Log($"🗡️ {gameObject.name} (Дальний) с мечом: скорость {enemyAI.speed:F1}, дальность {enemyAI.rangedAttackRange:F1}");
-            }
-            else if (currentWeapon == WeaponBuffType.Staff)
-            {
-                Debug.Log($"🪄 {gameObject.name} (Дальний) с посохом: статы без изменений");
-            }
-        }
-    }
-
-    // ✅ МЕТОД ДЛЯ УСТАНОВКИ ОРУЖИЯ ИЗ СПАВНЕРА
-    public void SetWeapon(WeaponBuffType weapon)
-    {
-        currentWeapon = weapon;
-
-        // Обновляем иконку
-        if (currentIcon != null) Destroy(currentIcon);
-        CreateWeaponIcon();
-
-        // Применяем бонусы
-        ApplyWeaponBonuses();
-
-        Debug.Log($"⚔️ {gameObject.name}: экипирован {currentWeapon}");
-    }
-
-    private void CreateWeaponIcon()
-    {
-        if (currentIcon != null) Destroy(currentIcon);
-
-        GameObject iconPrefab = null;
-
-        switch (currentWeapon)
-        {
-            case WeaponBuffType.Sword:
-                iconPrefab = swordIcon;
-                break;
-            case WeaponBuffType.Staff:
-                iconPrefab = staffIcon;
-                break;
-            default:
-                return;
+            // Просто восстанавливаем нормальные значения на всякий случай
+            if (enemyAI.speed < 0.1f) enemyAI.speed = 3.5f;
+            if (enemyAI.attackRange < 0.5f) enemyAI.attackRange = 2f;
+            if (enemyAI.damage < 1f) enemyAI.damage = 10f;
         }
 
-        if (iconPrefab != null)
-        {
-            currentIcon = Instantiate(iconPrefab, transform);
-            currentIcon.transform.localPosition = new Vector3(0, iconHeight, 0);
-            currentIcon.transform.localRotation = Quaternion.identity;
-            currentIcon.AddComponent<Billboard>();
-        }
+        Debug.Log($"🛡️ {gameObject.name}: WeaponStats заглушка активна (оружие отключено)");
     }
 
-    private void OnDestroy()
-    {
-        if (currentIcon != null) Destroy(currentIcon);
-    }
+    // Пустые методы, чтобы не ломать вызовы из EnemySpawner
+    public void SetWeapon(int dummy = 0) { }
+    public void ApplyWeaponBonuses() { }
 }

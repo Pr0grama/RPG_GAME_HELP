@@ -1,4 +1,4 @@
-using StateMachine;
+п»їusing StateMachine;
 using UnityEngine;
 
 namespace StateMachine.EnemyStates
@@ -16,25 +16,27 @@ namespace StateMachine.EnemyStates
         {
             context.SetAnimationFloat("speed", 0f);
             context.SetAnimationBool("isWalking", false);
-            Debug.Log($"{context.enemyTransform.name} -> IDLE (мирный)");
+            Debug.Log($"{context.enemyTransform.name} -> IDLE");
         }
 
         public void Update()
         {
-            // Если включен агрессивный режим (через кнопку) - переходим в Aggro
+            // вњ… РџР РРќРЈР”РРўР•Р›Р¬РќР«Р™ РџР•Р Р•РҐРћР” Р’ AGGRO Р”Р›РЇ РўР•РЎРўРђ
+            Debug.Log($"{context.enemyTransform.name}: IDLE Update, isAggressive={context.isAggressive}");
+
             if (context.isAggressive)
             {
-                Debug.Log($"{context.enemyTransform.name}: Агрессивный режим включен, перехожу в AGGRO!");
+                Debug.Log($"рџ”Ґ {context.enemyTransform.name}: РџР•Р Р•РҐРћР–РЈ Р’ AGGRO!");
                 context.ChangeState<EnemyAggroState>();
                 return;
             }
 
-            // В мирном режиме моб НЕ реагирует на игрока
-            // Только проверяем, нужно ли убегать (если HP низкий)
-            if (context.ShouldFlee())
+            // Р•СЃР»Рё РёРіСЂРѕРє СЂСЏРґРѕРј - С‚РѕР¶Рµ РїРµСЂРµС…РѕРґРёРј
+            if (context.playerTransform != null && context.DistanceToPlayer() < 10f)
             {
-                Debug.Log($"{context.enemyTransform.name}: HP низкий, убегаю!");
-                context.ChangeState<EnemyFleeState>();
+                Debug.Log($"рџ”Ґ {context.enemyTransform.name}: РР“Р РћРљ Р РЇР”РћРњ, РџР•Р Р•РҐРћР–РЈ Р’ AGGRO!");
+                context.isAggressive = true;
+                context.ChangeState<EnemyAggroState>();
             }
         }
 

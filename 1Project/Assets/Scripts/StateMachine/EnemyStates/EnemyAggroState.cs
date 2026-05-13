@@ -14,55 +14,40 @@ namespace StateMachine.EnemyStates
 
         public void Enter()
         {
-            context.SetAnimationFloat("speed", context.speed);
+            Debug.Log($"🎯 {context.enemyTransform.name}: ВХОД В AGGRO!");
             context.SetAnimationBool("isWalking", true);
-            Debug.Log($"{context.enemyTransform.name} -> AGGRO (скорость={context.speed})");
         }
 
         public void Update()
         {
-            // Проверяем, жив ли игрок
-            if (context.playerTransform == null)
-            {
-                Debug.LogWarning($"{context.enemyTransform.name}: playerTransform = null!");
-                return;
-            }
+            if (context.playerTransform == null) return;
 
             float distance = context.DistanceToPlayer();
 
-            // Проверка на бегство при низком HP
+            // Если нужно убегать — сразу уходим
             if (context.ShouldFlee())
             {
-                Debug.Log($"{context.enemyTransform.name}: HP низкий, убегаю!");
                 context.ChangeState<EnemyFleeState>();
                 return;
             }
 
-            // Проверка, можно ли атаковать
+            // Если игрок в радиусе атаки И можно атаковать — переходим в атаку
             if (context.IsPlayerInAttackRange() && context.CanAttack())
             {
-                Debug.Log($"{context.enemyTransform.name}: В радиусе атаки, атакую! (дистанция={distance:F1})");
                 context.ChangeState<EnemyAttackState>();
                 return;
             }
 
-            // ✅ ДВИЖЕНИЕ К ИГРОКУ
-            if (context.isRanged)
-            {
-                // Для дальнего боя - управление дистанцией
-                context.ManageRangeDistance();
-                Debug.Log($"{context.enemyTransform.name}: Управление дистанцией, движение к игроку");
-            }
-            else
-            {
-                // Для ближнего боя - просто бежим к игроку
-                context.MoveTowardsPlayer();
-                Debug.Log($"{context.enemyTransform.name}: Движение к игроку, дистанция={distance:F1}");
-            }
+            // Иначе — продолжаем движение к игроку
+            context.MoveTowardsPlayer();
+
+            // Отладка
+            Debug.Log($"🏃 {context.enemyTransform.name}: AGGRO | dist={distance:F1} | range={context.attackRange}");
         }
 
         public void Exit()
         {
+            Debug.Log($"🎯 {context.enemyTransform.name}: ВЫХОД ИЗ AGGRO");
             context.SetAnimationBool("isWalking", false);
         }
     }

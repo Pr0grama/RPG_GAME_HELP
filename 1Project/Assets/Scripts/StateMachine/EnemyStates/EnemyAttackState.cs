@@ -29,17 +29,13 @@ namespace StateMachine.EnemyStates
         {
             attackTimer -= Time.deltaTime;
 
-            // Для ближнего боя - урон в середине анимации
             if (!context.isRanged && attackTimer <= 0.25f && !hasDamaged)
             {
-                if (context.DistanceToPlayer() <= context.attackRange)  // ✅ ИСПРАВЛЕНО
-                {
+                if (context.DistanceToPlayer() <= context.attackRange)
                     context.DamagePlayer();
-                }
                 hasDamaged = true;
             }
 
-            // Для дальнего боя - выстрел в середине анимации
             if (context.isRanged && attackTimer <= 0.25f && !hasShot)
             {
                 context.RangedAttack();
@@ -48,7 +44,7 @@ namespace StateMachine.EnemyStates
 
             if (attackTimer <= 0f)
             {
-                context.ChangeState<EnemyAggroState>();
+                context.ChangeState<EnemyAggroState>();   // Возвращаемся в преследование
             }
         }
 

@@ -36,6 +36,7 @@ public class EnemyStateMachine : MonoBehaviour
     private static bool globalAggressiveMode = false;
 
     public StateMachine<EnemyStateMachine> StateMachine => stateMachine;
+    public EnemyStateContext Context => context;
 
     private void Start()
     {
@@ -55,7 +56,7 @@ public class EnemyStateMachine : MonoBehaviour
             return;
         }
 
-        // Устанавливаем isRanged на основе enemyType (но только если не задано вручную)
+        // Определяем isRanged
         if (!isRanged && enemyType == EnemyType.Ranged)
             isRanged = true;
         else if (isRanged && enemyType == EnemyType.Melee)
@@ -63,7 +64,7 @@ public class EnemyStateMachine : MonoBehaviour
 
         Debug.Log($"📊 {gameObject.name}: Тип={enemyType}, isRanged={isRanged}, isAggressive={isAggressive || globalAggressiveMode}");
 
-        // Создаём контекст
+        // === СОЗДАЁМ CONTEXT ===
         context = new EnemyStateContext
         {
             enemyTransform = transform,
@@ -88,12 +89,19 @@ public class EnemyStateMachine : MonoBehaviour
             maxDistanceToPlayer = maxDistanceToPlayer
         };
 
-        // Создаём машину состояний
         stateMachine = new StateMachine<EnemyStateMachine>(this);
         stateMachine.AddState(new EnemyIdleState(context));
         stateMachine.AddState(new EnemyAggroState(context));
         stateMachine.AddState(new EnemyAttackState(context));
         stateMachine.AddState(new EnemyFleeState(context));
+
+        // === ЗАЩИТА ПАРАМЕТРОВ (самое важное) ===
+        if (context.speed < 0.1f) context.speed = 3.5f;
+        if (context.attackRange < 0.5f) context.attackRange = 2f;
+        if (context.damage < 1f) context.damage = 10f;
+        if (context.attackCooldown < 0.1f) context.attackCooldown = 1.5f;
+
+        Debug.Log($"🛡️ {gameObject.name}: Защита параметров применена | speed={context.speed}");
 
         // Начальное состояние
         if (context.isAggressive)
@@ -121,9 +129,13 @@ public class EnemyStateMachine : MonoBehaviour
 
         stateMachine?.Update();
 
+        // Переключение глобального режима
         if (globalAggressiveMode != context.isAggressive)
         {
+            Debug.Log($"🔄 {gameObject.name}: Смена режима! global={globalAggressiveMode}, context={context.isAggressive}");
+
             context.isAggressive = globalAggressiveMode;
+
             if (globalAggressiveMode)
             {
                 stateMachine?.ChangeState<EnemyAggroState>();
@@ -143,7 +155,6 @@ public class EnemyStateMachine : MonoBehaviour
 
         Debug.Log($"💥 {gameObject.name}: получил урон");
 
-        // Если мирный режим - переключаем в агрессию при получении урона
         if (!context.isAggressive)
         {
             context.isAggressive = true;
@@ -152,7 +163,6 @@ public class EnemyStateMachine : MonoBehaviour
             return;
         }
 
-        // Проверяем, нужно ли убегать (при низком HP)
         if (context.ShouldFlee())
         {
             stateMachine?.ChangeState<EnemyFleeState>();
@@ -181,6 +191,24 @@ public class EnemyStateMachine : MonoBehaviour
     {
         globalAggressiveMode = aggressive;
         Debug.Log($"🌍 Глобальный режим мобов изменён на: {(aggressive ? "АГРЕССИВНЫЙ" : "МИРНЫЙ")}");
+
+        // ✅ ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ ДЛЯ ВСЕХ ВРАГОВ
+        EnemyStateMachine[] enemies = FindObjectsOfType<EnemyStateMachine>();
+        foreach (var enemy in enemies)
+        {
+            if (enemy != null && enemy.context != null)
+            {
+                enemy.context.isAggressive = globalAggressiveMode;
+                if (globalAggressiveMode)
+                {
+                    enemy.stateMachine?.ChangeState<EnemyAggroState>();
+                }
+                else
+                {
+                    enemy.stateMachine?.ChangeState<EnemyIdleState>();
+                }
+            }
+        }
     }
 
     public static void ToggleGlobalAggressiveMode()
@@ -188,11 +216,26 @@ public class EnemyStateMachine : MonoBehaviour
         SetGlobalAggressiveMode(!globalAggressiveMode);
     }
 
+    public static bool GetGlobalAggressiveMode()
+    {
+        return globalAggressiveMode;
+    }
+
     public void TriggerHitAnimation()
     {
         animator?.SetTrigger("hit");
     }
+    public void ForceMoveToPlayer()
+    {
+        if (player == null) return;
 
+        Vector3 direction = (player.position - transform.position).normalized;
+        Vector3 newPosition = transform.position + direction * speed * Time.deltaTime;
+        newPosition.y = transform.position.y;
+        transform.position = newPosition;
+
+        Debug.Log($"🔥 ПРИНУДИТЕЛЬНОЕ ДВИЖЕНИЕ: {gameObject.name} -> {newPosition}");
+    }
     private void OnDestroy()
     {
         if (health != null)

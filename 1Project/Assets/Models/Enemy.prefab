@@ -514,9 +514,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponStats
   currentWeapon: 0
   swordSpeedMultiplier: 1.3
-  swordRangeMultiplier: 0.7
+  swordRangeMultiplier: 1
   swordDamageMultiplier: 1
-  staffSpeedMultiplier: 0.7
+  staffSpeedMultiplier: 1
   staffRangeMultiplier: 1
   staffDamageMultiplier: 1.5
   swordIcon: {fileID: 2335637540991304855, guid: 1f7afdb612d9043439de784e5d7035c2, type: 3}
