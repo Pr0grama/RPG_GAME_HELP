@@ -12,9 +12,9 @@ public class Health : MonoBehaviour
     public float maxHealth = 100f;
     public float currentHealth;
     public System.Action onDeath;
-    public System.Action onTakeDamage;  // Событие для получения урона
+    public System.Action onTakeDamage;
 
-    public float deathAnimationDelay = 2f;  // Уменьшил до 2 секунд (было 600)
+    public float deathAnimationDelay = 2f;
 
     private Animator animator;
     private bool isDead = false;
@@ -43,10 +43,8 @@ public class Health : MonoBehaviour
         currentHealth -= amount;
         Debug.Log($"{gameObject.name} получил урон: {amount}, осталось: {currentHealth}");
 
-        // Вызываем событие получения урона
         onTakeDamage?.Invoke();
 
-        // Анимация получения урона
         if (animator != null)
         {
             animator.SetTrigger("hit");
@@ -74,14 +72,19 @@ public class Health : MonoBehaviour
 
         Debug.Log($"💀 [HEALTH] {gameObject.name}: Die() вызван");
 
-        // Анимация смерти
         if (animator != null)
         {
             animator.SetTrigger("death");
             Debug.Log($"💀 [HEALTH] Анимация death запущена");
         }
 
-        // Вызываем событие смерти
+        // ✅ ДОБАВЛЕНО: Увеличиваем счётчик убийств
+        if (gameObject.CompareTag("Enemy") && GameStats.Instance != null)
+        {
+            GameStats.Instance.AddKill();
+            Debug.Log($"📊 Добавлено убийство. Всего: {GameStats.Instance.KillCount}");
+        }
+
         if (onDeath != null)
         {
             onDeath.Invoke();
@@ -90,7 +93,6 @@ public class Health : MonoBehaviour
 
         if (gameObject.CompareTag("Enemy"))
         {
-            // ✅ ОТКЛЮЧАЕМ EnemyStateMachine вместо EnemyAI
             EnemyStateMachine enemyStateMachine = GetComponent<EnemyStateMachine>();
             if (enemyStateMachine != null)
             {
@@ -98,7 +100,6 @@ public class Health : MonoBehaviour
                 Debug.Log($"💀 [HEALTH] EnemyStateMachine отключен");
             }
 
-            // На всякий случай отключаем и старый EnemyAI (если есть)
             EnemyAI enemyAI = GetComponent<EnemyAI>();
             if (enemyAI != null)
             {
@@ -106,14 +107,12 @@ public class Health : MonoBehaviour
                 Debug.Log($"💀 [HEALTH] EnemyAI отключен");
             }
 
-            // Замораживаем физику
             if (rb != null)
             {
                 rb.isKinematic = true;
                 rb.linearVelocity = Vector3.zero;
             }
 
-            // Уничтожаем через время (для проигрывания анимации)
             Destroy(gameObject, deathAnimationDelay);
         }
     }
