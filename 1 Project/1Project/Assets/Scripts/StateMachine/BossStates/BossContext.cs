@@ -11,6 +11,9 @@ namespace StateMachine.BossStates
         public Animator animator;
         public BossStateMachine bossStateMachine;
 
+        // ✅ Добавляем контроллер оружия
+        public BossWeaponController weaponController;
+
         public float speed;
         public float originalSpeed;
 
@@ -57,11 +60,46 @@ namespace StateMachine.BossStates
 
         public bool CanAttack()
         {
+            // ✅ Используем оружие для проверки кулдауна
+            if (weaponController != null)
+                return weaponController.CanAttack();
             return Time.time >= lastAttackTime + attackCooldown;
+        }
+
+        public void PerformAttack()
+        {
+            // ✅ Используем систему оружия для атаки
+            if (weaponController != null)
+            {
+                weaponController.PerformAttack(playerTransform);
+                SetLastAttackTime();
+            }
+            else
+            {
+                DamagePlayer(false);
+                SetLastAttackTime();
+            }
+        }
+
+        public void PerformHeavyAttack()
+        {
+            // ✅ Сильная атака через систему оружия
+            if (weaponController != null)
+            {
+                weaponController.PerformHeavyAttack(playerTransform);
+                SetLastHeavyAttackTime();
+            }
+            else
+            {
+                DamagePlayer(true);
+                SetLastHeavyAttackTime();
+            }
         }
 
         public bool CanHeavyAttack()
         {
+            if (weaponController != null)
+                return weaponController.CanHeavyAttack();
             return Time.time >= lastHeavyAttackTime + heavyAttackCooldown;
         }
 
@@ -108,18 +146,20 @@ namespace StateMachine.BossStates
             animator?.SetBool(name, value);
         }
 
-        // ✅ ДОБАВИТЬ ЭТОТ МЕТОД
         public void SwitchToPhase2()
         {
             currentPhase = BossPhase.Phase2;
-            attackCooldown = originalAttackCooldown * 0.5f;      // в 2 раза быстрее
-            heavyAttackCooldown = originalHeavyAttackCooldown * 0.6f; // на 40% быстрее
-            speed = originalSpeed * 1.5f;                       // на 50% быстрее
+            attackCooldown = originalAttackCooldown * 0.5f;
+            heavyAttackCooldown = originalHeavyAttackCooldown * 0.6f;
+            speed = originalSpeed * 1.5f;
 
-            Debug.Log($"👑 БОСС ПЕРЕШЁЛ ВО 2 ФАЗУ! " +
-                      $"Атака: {attackCooldown}с (было {originalAttackCooldown}с), " +
-                      $"Сильная атака: {heavyAttackCooldown}с (было {originalHeavyAttackCooldown}с), " +
-                      $"Скорость: {speed} (было {originalSpeed})");
+            // ✅ Уведомляем контроллер оружия о смене фазы
+            if (weaponController != null)
+            {
+                weaponController.OnPhase2Start();
+            }
+
+            Debug.Log($"👑 БОСС ПЕРЕШЁЛ ВО 2 ФАЗУ! Скорость атак увеличена!");
         }
 
         public float GetHealthPercent()
@@ -127,11 +167,23 @@ namespace StateMachine.BossStates
             if (health == null) return 1f;
             return health.currentHealth / health.maxHealth;
         }
+
+        // ✅ Получение текущей стихии
+        public ElementType GetCurrentElement()
+        {
+            return weaponController?.CurrentElement ?? ElementType.Fire;
+        }
+
+        // ✅ Получение текущего типа оружия
+        public WeaponType GetCurrentWeaponType()
+        {
+            return weaponController?.CurrentWeaponType ?? WeaponType.Melee;
+        }
     }
 
     public enum BossPhase
     {
-        Phase1,  // HP > 50%
-        Phase2   // HP <= 50%
+        Phase1,
+        Phase2
     }
 }

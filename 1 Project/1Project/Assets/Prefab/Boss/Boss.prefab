@@ -193,6 +193,37 @@ MonoBehaviour:
   enemyHealth: {fileID: 8691188610865977841}
   healthSlider: {fileID: 3989821238541947991}
   offset: {x: 0, y: 2.5, z: 0}
+--- !u!1 &1784859345675619648
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3841100193914399616}
+  m_Layer: 0
+  m_Name: ShootProjectile
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3841100193914399616
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784859345675619648}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.02673, y: 0.6757, z: 0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4636890149355135149}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2559385637921028498
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,6 +315,7 @@ GameObject:
   - component: {fileID: 8691188610865977841}
   - component: {fileID: 8352426981389449024}
   - component: {fileID: 4865365443696384555}
+  - component: {fileID: 4640750254322587875}
   m_Layer: 6
   m_Name: Boss
   m_TagString: Enemy
@@ -306,6 +338,7 @@ Transform:
   m_Children:
   - {fileID: 4396902865211516015}
   - {fileID: 4609386759211648986}
+  - {fileID: 3841100193914399616}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &630680122677011651
@@ -477,6 +510,36 @@ MonoBehaviour:
   phase2SpeedMultiplier: 1.5
   phase2AttackCooldownMultiplier: 0.5
   phase2HeavyCooldownMultiplier: 0.6
+  startWeapon: 0
+  startElement: 0
+  autoInitializeWeapon: 1
+--- !u!114 &4640750254322587875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6825791075331695195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26004ec974af25245bef2a35d29fa540, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossWeaponController
+  currentWeaponType: 0
+  currentElement: 0
+  elementChangeInterval: 15
+  autoChangeElement: 1
+  meleeDamage: 30
+  rangedDamage: 25
+  heavyMeleeDamage: 50
+  heavyRangedDamage: 40
+  meleeAttackEffect: {fileID: 6940045840344212828, guid: 0030566173c047d4599ab217a395ed04, type: 3}
+  rangedProjectilePrefab: {fileID: 1557368770733179068, guid: cac1126e6ffc6d44d8ea4f8426d37b77, type: 3}
+  heavyAttackEffect: {fileID: 1349207369672698065, guid: 99f180ef9638e9a4c88b6f6d43ef4a52, type: 3}
+  shootPoint: {fileID: 3841100193914399616}
+  meleeSounds: []
+  rangedSounds: []
+  heavySounds: []
 --- !u!1 &7211586390988844887
 GameObject:
   m_ObjectHideFlags: 0

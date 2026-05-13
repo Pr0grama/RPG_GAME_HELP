@@ -6,31 +6,55 @@ public class MagicProjectile : MonoBehaviour
     public float damage = 30f;
     public float lifetime = 3f;
     public GameObject impactEffect;
+    public bool isMagic = true;  // true - магия, false - физическая атака
+
+    private Vector3 direction;
 
     private void Start()
     {
-        // Уничтожаем снаряд через время
+        direction = transform.forward;
         Destroy(gameObject, lifetime);
     }
 
     private void Update()
     {
-        // Двигаем вперёд (в локальном пространстве)
-        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        transform.position += direction * speed * Time.deltaTime;
+
+        // Вращаем снаряд в направлении движения
+        if (direction != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(direction);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Health enemyHealth = other.GetComponent<Health>();
-        if (enemyHealth != null)
+        // Попадание во врага
+        if (other.CompareTag("Enemy"))
         {
-            enemyHealth.TakeDamage(damage, DamageType.Magical);
-            Debug.Log("🧙 Урон магией: " + damage);
+            Health enemyHealth = other.GetComponent<Health>();
+            if (enemyHealth != null)
+            {
+                DamageType type = isMagic ? DamageType.Magical : DamageType.Physical;
+                enemyHealth.TakeDamage(damage, type);
+
+                string attackType = isMagic ? "магией" : "физической атакой";
+                Debug.Log($"🏹 Снаряд нанёс {damage} урона {attackType}!");
+            }
+
+            if (impactEffect != null)
+                Instantiate(impactEffect, transform.position, Quaternion.identity);
+
+            Destroy(gameObject);
         }
 
-        if (impactEffect != null)
-            Instantiate(impactEffect, transform.position, Quaternion.identity);
+        // Попадание в стену или препятствие
+        if (other.CompareTag("Wall") || other.CompareTag("Obstacle"))
+        {
+            if (impactEffect != null)
+                Instantiate(impactEffect, transform.position, Quaternion.identity);
 
-        Destroy(gameObject);
+            Destroy(gameObject);
+        }
     }
 }

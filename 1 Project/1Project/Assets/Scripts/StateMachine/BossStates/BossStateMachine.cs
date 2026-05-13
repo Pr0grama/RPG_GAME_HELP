@@ -17,23 +17,41 @@ public class BossStateMachine : MonoBehaviour
     [SerializeField] private float phase2AttackCooldownMultiplier = 0.5f;
     [SerializeField] private float phase2HeavyCooldownMultiplier = 0.6f;
 
+    [Header("Система оружия")]
+    [SerializeField] private WeaponType startWeapon = WeaponType.Melee;
+    [SerializeField] private ElementType startElement = ElementType.Fire;
+    [SerializeField] private bool autoInitializeWeapon = true;
+
     private Health health;
     private Animator animator;
     private Transform player;
     private BossContext context;
     private StateMachine<BossStateMachine> stateMachine;
+    private BossWeaponController weaponController;
 
     private bool isPeacefulMode = true;
     private bool isPhase2Active = false;
 
-    // ✅ ДОБАВИТЬ ЭТО СВОЙСТВО
     public StateMachine<BossStateMachine> StateMachine => stateMachine;
+    public BossWeaponController WeaponController => weaponController;
 
     private void Start()
     {
         health = GetComponent<Health>();
         animator = GetComponent<Animator>();
         if (animator == null) animator = GetComponentInChildren<Animator>();
+
+        // ✅ Инициализируем систему оружия
+        weaponController = GetComponent<BossWeaponController>();
+        if (weaponController == null)
+        {
+            weaponController = gameObject.AddComponent<BossWeaponController>();
+        }
+
+        if (autoInitializeWeapon)
+        {
+            weaponController.SetWeaponAndElement(startWeapon, startElement);
+        }
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null) player = playerObj.transform;
@@ -44,6 +62,8 @@ public class BossStateMachine : MonoBehaviour
             playerTransform = player,
             health = health,
             animator = animator,
+            bossStateMachine = this,
+            weaponController = weaponController,  // ✅ Передаём контроллер
             originalSpeed = speed,
             speed = speed,
             attackRange = attackRange,
@@ -53,12 +73,9 @@ public class BossStateMachine : MonoBehaviour
             heavyAttackDamage = heavyAttackDamage,
             originalHeavyAttackCooldown = heavyAttackCooldown,
             heavyAttackCooldown = heavyAttackCooldown,
-            isPeacefulMode = isPeacefulMode,
-            // ✅ ПЕРЕДАЁМ ССЫЛКУ НА BOSS STATE MACHINE
-            bossStateMachine = this
+            isPeacefulMode = isPeacefulMode
         };
 
-        // Создание машины состояний
         stateMachine = new StateMachine<BossStateMachine>(this);
         stateMachine.AddState(new BossIdleState(context));
         stateMachine.AddState(new BossAggroState(context));
@@ -71,6 +88,8 @@ public class BossStateMachine : MonoBehaviour
         {
             health.onTakeDamage += OnTakeDamage;
         }
+
+        Debug.Log($"👑 Босс инициализирован. Оружие: {startWeapon}, Стихия: {startElement}");
     }
 
     private void Update()
